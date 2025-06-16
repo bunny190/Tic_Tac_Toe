@@ -1,0 +1,79 @@
+import math
+
+def print_board(board):
+    for row in board:
+        print("|".join(row))
+    print()
+
+def check_winner(board):
+    for row in board:
+        if row.count(row[0]) == 3 and row[0] != " ":
+            return row[0]
+    for col in range(3):
+        if all(row[col] == board[0][col] != " " for row in board):
+            return board[0][col]
+    if all(board[i][i] == board[0][0] != " " for i in range(3)) or all(board[i][2 - i] == board[0][2] != " " for i in range(3)):
+        return board[0][0]
+    return None
+
+def minimax(board, is_max):
+    winner = check_winner(board)
+    if winner == "O":
+        return 1
+    if winner == "X":
+        return -1
+    if all(cell != " " for row in board for cell in row):
+        return 0
+
+    if is_max:
+        best = -math.inf
+        for i in range(3):
+            for j in range(3):
+                if board[i][j] == " ":
+                    board[i][j] = "O"
+                    best = max(best, minimax(board, False))
+                    board[i][j] = " "
+        return best
+    else:
+        best = math.inf
+        for i in range(3):
+            for j in range(3):
+                if board[i][j] == " ":
+                    board[i][j] = "X"
+                    best = min(best, minimax(board, True))
+                    board[i][j] = " "
+        return best
+
+def best_move(board):
+    best_score = -math.inf
+    move = (-1, -1)
+    for i in range(3):
+        for j in range(3):
+            if board[i][j] == " ":
+                board[i][j] = "O"
+                score = minimax(board, False)
+                board[i][j] = " "
+                if score > best_score:
+                    best_score = score
+                    move = (i, j)
+    return move
+
+def play_game():
+    board = [[" " for _ in range(3)] for _ in range(3)]
+    print("Tic-Tac-Toe! You (X) vs AI (O)")
+    for _ in range(9):
+        print_board(board)
+        if check_winner(board):
+            print("Winner:", check_winner(board))
+            break
+        if _ % 2 == 0:
+            r, c = map(int, input("Enter your move (row col): ").split())
+            if board[r][c] == " ":
+                board[r][c] = "X"
+        else:
+            r, c = best_move(board)
+            board[r][c] = "O"
+    else:
+        print("It's a draw!")
+
+play_game()
